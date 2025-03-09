@@ -1,49 +1,63 @@
-let humanScore = 0
-let computerScore = 0
+let humanScore = 0;
+let computerScore = 0;
+const scoreToWin = 5;  // Puntuación necesaria para ganar
 
-function getComputerChoice () {
-    let choice = ["piedra", "papel", "tijera"]
-    return choice [Math.floor(Math.random() * 3)]
+function getComputerChoice() {
+    let choices = ["piedra", "papel", "tijera"];
+    return choices[Math.floor(Math.random() * 3)];
 }
 
-function getHumanChoice () {
-    let choice = prompt("Escoja su jugada: PIEDRA, PAPEL o TIJERA.").toLowerCase()
-    while (!["piedra", "papel", "tijera"].includes(choice)) {
-        choice = prompt("Entrada inválida. Elige: PIEDRA, PAPEL o TIJERA").toLowerCase()
-    }
-    return choice
-}
-
-function playRound (humanChoice, computerChoice) {
+function playRound(humanChoice, computerChoice) {
     if (humanChoice === computerChoice) {
-        console.log ("Ha habido un empate.")
-    } else if (humanChoice === "PIEDRA" && computerChoice === "PAPEL" ||
-        humanChoice === "PAPEL" && computerChoice === "TIJERA" ||
-        humanChoice === "TIJERA" && computerChoice === "PIEDRA") {
-        console.log ("Has perdido esta ronda.")
-        computerScore++
+        return "Ha habido un empate.";
+    } else if (
+        (humanChoice === "piedra" && computerChoice === "tijera") ||
+        (humanChoice === "papel" && computerChoice === "piedra") ||
+        (humanChoice === "tijera" && computerChoice === "papel")
+    ) {
+        humanScore++;
+        return "¡Has ganado esta ronda!";
     } else {
-        console.log ("Has ganado esta ronda.")
-        humanScore++
+        computerScore++;
+        return "Has perdido esta ronda.";
     }
 }
 
-function playGame () {
-    humanScore = 0
-    computerScore = 0
-    for (let i = 1; i <=5; i++) {
-        console.log (`Ronda ${i}`)
-        let humanChoice = getHumanChoice ()
-        let computerChoice = getComputerChoice ()
-        console.log (`Jugador elige: ${humanChoice} - Ordenador elige: ${computerChoice}`)
-        playRound (humanChoice, computerChoice)
-        console.log (`Puntuación: Jugador ${humanScore} - Ordenador ${computerScore}`)
-    }
-    if (humanScore > computerScore) {
-        console.log ("Ha ganado usted.")
-    } else {
-        console.log ("Ha ganado el ordenador.")
+// Actualiza el marcador en la página
+function updateScoreboard() {
+    document.getElementById("humanScore").textContent = humanScore;
+    document.getElementById("computerScore").textContent = computerScore;
+}
+
+// Finaliza el juego si alguno de los jugadores llega a la puntuación de 5
+function checkGameOver() {
+    if (humanScore === scoreToWin) {
+        document.getElementById("result").textContent = "¡Felicidades! Has ganado el juego.";
+        endGame();
+    } else if (computerScore === scoreToWin) {
+        document.getElementById("result").textContent = "El ordenador ha ganado el juego. Mejor suerte la próxima vez.";
+        endGame();
     }
 }
 
-playGame ()
+// Deshabilita los botones cuando el juego termina
+function endGame() {
+    document.querySelectorAll("button").forEach(button => button.disabled = true);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("button").forEach(boton => {
+        boton.addEventListener("click", () => {
+            if (humanScore < scoreToWin && computerScore < scoreToWin) {
+                let humanChoice = boton.name;
+                let computerChoice = getComputerChoice();
+                let resultado = playRound(humanChoice, computerChoice);
+
+                // Mostrar el resultado en la página
+                document.getElementById("result").textContent = `Elegiste: ${humanChoice} - Ordenador eligió: ${computerChoice}.\n${resultado}`;
+                updateScoreboard();
+                checkGameOver();  // Verifica si el juego ha terminado
+            }
+        });
+    });
+});
